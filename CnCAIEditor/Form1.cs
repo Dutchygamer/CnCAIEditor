@@ -26,19 +26,17 @@ namespace CnCAIEditor
         private void LoadFile()
         {
             OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Title = "Test";
-            dialog.Filter = "ini files|*.ini";
+            dialog.Title = "Select AI.ini";
+            dialog.Filter = ".ini|*.ini";
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-                string file = dialog.FileName;
                 try
                 {
-                    //Controller.ReadFileAsStringArray(File.ReadAllLines(file));
-                    Controller.ReadFileAsString(File.ReadAllText(file));
+                    Controller.ReadFileAsString(File.ReadAllText(dialog.FileName));
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("OH NO!");
+                    Console.WriteLine("OH NO!" + e.Message);
                 }
             }
         }
