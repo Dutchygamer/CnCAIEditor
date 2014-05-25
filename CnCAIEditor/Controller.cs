@@ -1,16 +1,18 @@
-﻿using System;
+﻿using CnCAIEditor.Objects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace CnCAIEditor
 {
     public static class Controller
     {
-        public static List<string> TaskforceList = new List<string>();
-        public static List<string> TeamList = new List<string>();
-        public static List<string> ScriptTypeList = new List<string>();
+        public static List<Taskforce> TaskforceList = new List<Taskforce>();
+        public static List<Team> TeamList = new List<Team>();
+        public static List<ScriptType> ScriptTypeList = new List<ScriptType>();
 
         //TODO: eerste versie gaat ervanuit dat de AI.ini in de juiste volgorde staat
         //juiste volgorde => lijst van TaskForces staat onder [TaskForces] (als voorbeeld)
@@ -40,6 +42,11 @@ namespace CnCAIEditor
 
         public static void ReadFileAsString(string fileData)
         {
+            //clear all lists when reading new file
+            TaskforceList.Clear();
+            TeamList.Clear();
+            ScriptTypeList.Clear();
+            
             var splittedFileData = fileData.Split('[');
 
             //for each found object ('[xxx]')
@@ -55,61 +62,186 @@ namespace CnCAIEditor
                 else if (fixedLine.Contains("[AITriggerTypes]"))
                 {
                     Console.WriteLine("Triggers found!");
-                    Console.WriteLine(fixedLine);
+                    //Console.WriteLine(fixedLine);
                 }
                 //else decide what kind of object it is
                 else
                     ReadDataAndAddToList(fixedLine);
             }
 
+            //Console.WriteLine("TaskforceList");
+            //foreach (var wat in TaskforceList)
+            //    Console.WriteLine(wat);
 
-            //TODO: object splitsen op enters
-            //daarna via reflection variabelen koppelen
-            //als in:
-            //Name=H_GDI APC/engineer attack
-            //zoek via reflection in Team class naar attribuut Name en geef deze de waarde "H_GDI APC/engineer attack"
+            //Console.WriteLine("ScriptTypeList");
+            //foreach (var wat in ScriptTypeList)
+            //    Console.WriteLine(wat);
 
-            Console.WriteLine("TaskforceList");
-            foreach (var wat in TaskforceList)
-                Console.WriteLine(wat);
-
-            Console.WriteLine("ScriptTypeList");
-            foreach (var wat in ScriptTypeList)
-                Console.WriteLine(wat);
-
-            Console.WriteLine("TeamList");
-            foreach (var wat in TeamList)
-                Console.WriteLine(wat);
+            //Console.WriteLine("TeamList");
+            //foreach (var wat in TeamList)
+            //    Console.WriteLine(wat);
 
             Console.WriteLine("THEY'RE DONE");
         }
-        
+
         /// <summary>
         /// Reads the string, decides what it is, and adds it to the correct list.
         /// </summary>
         public static void ReadDataAndAddToList(string data)
         {
-            //if contains 'VeteranLevel=', it's a Team
-            if (data.Contains("VeteranLevel="))
+            try
             {
-                //Console.WriteLine("Team");
-                //Console.WriteLine(data);
-                TeamList.Add(data);
+                //if contains 'VeteranLevel=', it's a Team
+                if (data.Contains("VeteranLevel="))
+                {
+                    TeamList.Add(GenerateTeam(data));
+                }
+                //if not, but contains 'Group=', it's a Taskforce
+                else if (data.Contains("Group="))
+                {
+                    TaskforceList.Add(GenerateTaskforce(data));
+                }
+                //if not, but contains 'Name=', it's a ScriptType
+                else if (data.Contains("Name="))
+                {
+                    ScriptTypeList.Add(GenerateScriptTypes(data));
+                }
             }
-            //if not, but contains 'Group=', it's a Taskforce
-            else if (data.Contains("Group="))
+            catch (Exception e)
             {
-                //Console.WriteLine("Taskforce");
-                //Console.WriteLine(data);
-                TaskforceList.Add(data);
-            }
-            //if not, but contains 'Name=', it's a ScriptType
-            else if (data.Contains("Name="))
-            {
-                //Console.WriteLine("ScriptType");
-                //Console.WriteLine(data);
-                ScriptTypeList.Add(data);
+                var moo = "mpp";
             }
         }
+
+        /// <summary>
+        /// Converts string data into Team object
+        /// </summary>
+        private static Team GenerateTeam(string data)
+        {
+            string[] lines = data.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            var dictionary = new Dictionary<string, string>();
+
+            foreach (var line in lines)
+            {
+                //if the first line, skip
+                if (line.StartsWith("[") || line.StartsWith(";"))
+                    continue;
+                //split into key and value, and add to dictionary
+                var keyvalue = line.Split('=');
+                dictionary.Add(keyvalue[0], keyvalue[1]);
+            }
+
+            var result = new Team();
+            //loop trough all fields of Team and find matching value in dictionary
+            foreach (var field in typeof(Team).GetProperties())
+            {
+                string value;
+                if(dictionary.TryGetValue(field.Name, out value))
+                    field.SetValue(result, value);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Converts string data into Taskforce object
+        /// </summary>
+        private static Taskforce GenerateTaskforce(string data)
+        {
+            string[] lines = data.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            var dictionary = new Dictionary<string, string>();
+            var unitlist = new List<string>();
+
+            foreach (var line in lines)
+            {
+                //if the first line or a comment, skip
+                if (line.StartsWith("[") || line.StartsWith(";"))
+                    continue;
+                //if it starts with a number, add to unit list
+                if (Regex.IsMatch(line, @"^\d"))
+                {
+                    var keyvalue = line.Split('=');
+                    //if it contains an actual value, add to unit list
+                    if (!String.IsNullOrEmpty(keyvalue[1]))
+                        unitlist.Add(keyvalue[1]);
+                }
+                //else, it's a normal field we need to add to the dictionary
+                else
+                {
+                    var keyvalue = line.Split('=');
+                    dictionary.Add(keyvalue[0], keyvalue[1]);
+                }
+            }
+
+            //loop trough all fields of Taskforce and find matching value in dictionary
+            var result = new Taskforce();
+            foreach (var field in typeof(Taskforce).GetProperties())
+            {
+                //if its the Members field, give it the unitlist
+                if (field.Name == "Members")
+                    field.SetValue(result, unitlist);
+                //else give it the value from the dictionary
+                else
+                {
+                    string value;
+                    if (dictionary.TryGetValue(field.Name, out value))
+                        field.SetValue(result, value);
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Converts string data into ScriptType object
+        /// </summary>
+        private static ScriptType GenerateScriptTypes(string data)
+        {
+            string[] lines = data.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            var dictionary = new Dictionary<string, string>();
+            var unitlist = new List<string>();
+
+            foreach (var line in lines)
+            {
+                //if the first line or a comment, skip
+                if (line.StartsWith("[") || line.StartsWith(";"))
+                    continue;
+                //if it starts with a number, add to unit list
+                if (Regex.IsMatch(line, @"^\d"))
+                {
+                    var keyvalue = line.Split('=');
+                    //if it contains an actual value, add to unit list
+                    if (!String.IsNullOrEmpty(keyvalue[1]))
+                        unitlist.Add(keyvalue[1]);
+                }
+                //else, it's a normal field we need to add to the dictionary
+                else
+                {
+                    var keyvalue = line.Split('=');
+                    dictionary.Add(keyvalue[0], keyvalue[1]);
+                }
+            }
+
+            //loop trough all fields of Taskforce and find matching value in dictionary
+            var result = new ScriptType();
+            foreach (var field in typeof(ScriptType).GetProperties())
+            {
+                //if its the Members field, give it the unitlist
+                if (field.Name == "Actions")
+                    field.SetValue(result, unitlist);
+                //else give it the value from the dictionary
+                else
+                {
+                    string value;
+                    if (dictionary.TryGetValue(field.Name, out value))
+                        field.SetValue(result, value);
+                }
+            }
+
+            return result;
+        }
+
+        //TODO: Trigger object
+        //TODO: Trigger generate function
     }
 }
