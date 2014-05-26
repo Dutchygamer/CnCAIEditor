@@ -52,6 +52,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Objects\ScriptType.cs" />
+    <Compile Include="Objects\Trigger.cs" />
     <Compile Include="Objects\Team.cs" />
     <Compile Include="Objects\Taskforce.cs" />
     <Compile Include="Program.cs" />

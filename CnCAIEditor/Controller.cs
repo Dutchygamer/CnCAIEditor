@@ -13,6 +13,7 @@ namespace CnCAIEditor
         public static List<Taskforce> TaskforceList = new List<Taskforce>();
         public static List<Team> TeamList = new List<Team>();
         public static List<ScriptType> ScriptTypeList = new List<ScriptType>();
+        public static List<Trigger> TriggersList = new List<Trigger>();
 
         //TODO: eerste versie gaat ervanuit dat de AI.ini in de juiste volgorde staat
         //juiste volgorde => lijst van TaskForces staat onder [TaskForces] (als voorbeeld)
@@ -46,6 +47,7 @@ namespace CnCAIEditor
             TaskforceList.Clear();
             TeamList.Clear();
             ScriptTypeList.Clear();
+            TriggersList.Clear();
             
             var splittedFileData = fileData.Split('[');
 
@@ -68,18 +70,6 @@ namespace CnCAIEditor
                 else
                     ReadDataAndAddToList(fixedLine);
             }
-
-            //Console.WriteLine("TaskforceList");
-            //foreach (var wat in TaskforceList)
-            //    Console.WriteLine(wat);
-
-            //Console.WriteLine("ScriptTypeList");
-            //foreach (var wat in ScriptTypeList)
-            //    Console.WriteLine(wat);
-
-            //Console.WriteLine("TeamList");
-            //foreach (var wat in TeamList)
-            //    Console.WriteLine(wat);
 
             Console.WriteLine("THEY'RE DONE");
         }
@@ -105,6 +95,12 @@ namespace CnCAIEditor
                 else if (data.Contains("Name="))
                 {
                     ScriptTypeList.Add(GenerateScriptTypes(data));
+                }
+                //TODO: goeie check of het een trigger is
+                //TODO: RegEx gebruiken is wellicht een goeie
+                else
+                {
+                    TriggersList.Add(GenerateTrigger(data));
                 }
             }
             catch (Exception e)
@@ -241,7 +237,45 @@ namespace CnCAIEditor
             return result;
         }
 
-        //TODO: Trigger object
         //TODO: Trigger generate function
+
+        /// <summary>
+        /// Converts string data into ScriptType object
+        /// </summary>
+        private static Trigger GenerateTrigger(string data)
+        {
+            string[] lines = data.Split(',');
+
+            //TODO: foutafhandeling indien gare waarden die niet naar int/float/bool geconvert kunnen worden
+
+            var result = new Trigger
+            {
+                Code = lines[0],
+                Name = lines[1],
+                TeamID = lines[2],
+                //Team = lines[2],
+                Owner = lines[3],
+                TechLevel = Int32.Parse(lines[4]),
+                //TriggerType = lines[5],
+                TechTypeID = lines[7],
+                //TechType = lines[0],
+                TriggerValue = lines[8],
+                WeigthedProbability = float.Parse(lines[9]),
+                MinWeigthedProbability = float.Parse(lines[10]),
+                MaxWeigthedProbability = float.Parse(lines[11]),
+                AvailableInSkirmish = bool.Parse(lines[12]),
+                //DummyValue = lines[0],
+                //SideOwner = lines[14],
+                IsBaseDefence = bool.Parse(lines[15]),
+                SupportTeamID = lines[16],
+                //Code = lines[16],
+                IsEasy = bool.Parse(lines[17]),
+                IsMedium = bool.Parse(lines[18]),
+                IsHard = bool.Parse(lines[19])
+            };
+
+            return result;
+        }
+
     }
 }
