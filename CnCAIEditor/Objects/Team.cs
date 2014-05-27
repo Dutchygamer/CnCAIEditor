@@ -8,6 +8,7 @@ namespace CnCAIEditor.Objects
 {
     public class Team
     {
+        public string ID { get; set; }
         public string Name { get; set; }
         public string VeteranLevel { get; set; }
         public string Loadable { get; set; }
