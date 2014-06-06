@@ -43,6 +43,10 @@ namespace CnCAIEditor
 
         public static void ReadFileAsString(string fileData)
         {
+            var moo1 = StringToDecimal("1.0");
+            var moo2 = StringToDecimal("1");
+            var moo3 = StringToDecimal("napalm");
+
             //clear all lists when reading new file
             TaskforceList.Clear();
             TeamList.Clear();
@@ -277,15 +281,16 @@ namespace CnCAIEditor
         /// </summary>
         private static Trigger GenerateTrigger(string data)
         {
-            var eins = data.Split('=');
-            var zwei = eins[1].Split(',');
+            //TODO: afvangen indien Trigger niet compleet is en er stukken missen, waardoor de conversie op zn bek gaat
+            //wellicht losse functie die hiervoor checkt
+
+            var triggerID = data.Split('=');
+            var triggerComponents = triggerID[1].Split(',');
 
             var lines = new List<string>();
-            lines.Add(eins[0]);
-            lines.AddRange(zwei);
-
-            //TODO: foutafhandeling indien gare waarden die niet naar int/float/bool geconvert kunnen worden
-
+            lines.Add(triggerID[0]);
+            lines.AddRange(triggerComponents);
+            
             var result = new Trigger
             {
                 ID = lines[0],                                      //0981GEB0-G=
@@ -293,14 +298,15 @@ namespace CnCAIEditor
                 TeamID = lines[2],                                  //09GAESV1-G,
                 //Team = lines[2],                                  
                 Owner = lines[3],                                   //<all>,
-                TechLevel = Int32.Parse(lines[4]),                  //9,
+                TechLevel = StringToInt(lines[4]),                  //9,
                 //TriggerType = lines[5],                             //-1,
                 TechTypeID = lines[6],                              //GAHPAD,
                 //TechType = lines[6],
                 TriggerValue = lines[7],                            //0100000003000000000000000000000000000000000000000000000000000000,
-                WeigthedProbability = float.Parse(lines[8]),        //70.000000,
-                MinWeigthedProbability = float.Parse(lines[9]),     //10.000000,
-                MaxWeigthedProbability = float.Parse(lines[10]),    //80.000000,
+                //TODO: beslissen of dit floats/decimals moeten zijn, of strings zijn zodat we kunnen forceren dat er 6 getallen achter de . zitten
+                WeigthedProbability = StringToDecimal(lines[8]),        //70.000000,
+                MinWeigthedProbability = StringToDecimal(lines[9]),     //10.000000,
+                MaxWeigthedProbability = StringToDecimal(lines[10]),    //80.000000,
                 AvailableInSkirmish = StringToBool(lines[11]),        //1,
                 //DummyValue = lines[12],                            //0,
                 //SideOwner = lines[13],                              //1,
@@ -315,9 +321,40 @@ namespace CnCAIEditor
             return result;
         }
 
+        //TODO: foutafhandeling indien gare waarden die niet naar int/float/bool geconvert kunnen worden
+        /// <summary>
+        /// Tries to convert given string value to a bool.
+        /// Returns false if string is '0' or not a number.
+        /// Else returns true.
+        /// </summary>
         private static bool StringToBool(string value)
         {
             return (value == "1") ? true : false;
+        }
+
+        //TODO: foutafhandeling indien gare waarden die niet naar int/float/bool geconvert kunnen worden
+        /// <summary>
+        /// Tries to convert given string value to an int32.
+        /// Returns 0 if string is not a number.
+        /// Else returns the string value as an int32.
+        /// </summary>
+        private static int StringToInt(string value)
+        {
+            int intvalue;
+            Int32.TryParse(value, out intvalue);
+
+            return intvalue;
+        }
+
+        //TODO: foutafhandeling indien gare waarden die niet naar int/float/bool geconvert kunnen worden
+        /// <summary>
+        /// Tries to convert given string value to a decimal rounded to 6 digits.
+        /// </summary>
+        private static decimal StringToDecimal(string value)
+        {
+            decimal decimalvalue;
+            Decimal.TryParse(value, out decimalvalue);
+            return Decimal.Round(decimalvalue, 6);
         }
     }
 }

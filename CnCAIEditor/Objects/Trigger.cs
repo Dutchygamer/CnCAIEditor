@@ -39,11 +39,11 @@ namespace CnCAIEditor.Objects
 
         public string TriggerValue { get; set; }
 
-        public float WeigthedProbability { get; set; }
+        public decimal WeigthedProbability { get; set; }
 
-        public float MinWeigthedProbability { get; set; }
+        public decimal MinWeigthedProbability { get; set; }
 
-        public float MaxWeigthedProbability { get; set; }
+        public decimal MaxWeigthedProbability { get; set; }
 
         //TODO: either 0 or 1, else possibly change to int
         public bool AvailableInSkirmish { get; set; }
