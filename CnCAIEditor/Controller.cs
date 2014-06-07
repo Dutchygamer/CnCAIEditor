@@ -83,13 +83,34 @@ namespace CnCAIEditor
             string[] lines = data.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
             foreach(var line in lines)
-                //TODO: regex fixen dat ie ook Triggers oppakt met <none> ipv target (en andersom indien Second Team aanwezig is)
-                //old
-                //@"^[\d\w\-]+=[\d\w\s\._/]+,[\d\w\-]+,<[\w]+>,\d,\d,[\w]+,[\d\w]{64},[\d]+.[\d]+,[\d]+.[\d]+,[\d]+.[\d]+,\d,[0],\d,\d,<[\w]+>,\d,\d,\d$"
-                //(possible) new
-                //@"^[\d\w\-]+=[\d\w\s\._/]+,[\d\w\-]+,<[\w]+>,\d,\d,[\w]+|<none>,[\d\w]{64},[\d]+.[\d]+,[\d]+.[\d]+,[\d]+.[\d]+,\d,[0],\d,\d,[\w]+|<none>,\d,\d,\d$"
-                if (Regex.IsMatch(line, @"^[\d\w\-]+=[\d\w\s\._/]+,[\d\w\-]+,<[\w]+>,\d,\d,[\w]+,[\d\w]{64},[\d]+.[\d]+,[\d]+.[\d]+,[\d]+.[\d]+,\d,[0],\d,\d,<[\w]+>,\d,\d,\d$"))
+                //RegEx legend for future reference:
+                //^[\d\w\-]+            ID - ints, chars or '-'
+                //=[\d\w\s\._/']+,      Name - all kind of text
+                //[\d\w\-]+,            TeamID - ints, chars or '-'
+                //<[\w]+>,              Owner - <all> //TODO: kan iets anders zijn dan <all> afaik. Nalopen
+                //\d,                   TechLevel - int
+                //-?\d,                 TriggerType - int or negative int
+                //(<none>|[\w_]+),      TechTypeID - (<none>) or (chars or '-')
+                //[\d\w]{64},           TriggerValue - 64 int magic value
+                //[\d]+.[\d]{6},        WeigthedProbability - int + '.' + 6 ints
+                //[\d]+.[\d]{6},        MinWeigthedProbability - int + '.' + 6 ints
+                //[\d]+.[\d]{6},        MaxWeigthedProbability - int + '.' + 6 ints
+                //[1|0],                AvailableInSkirmish - bool
+                //[0],                  DummyValue - exactly what it says on the tin
+                //[\d],                 SideOwner - int
+                //[1|0],                IsBaseDefence - bool
+                //(<none>|[\d\w\-]+),   SupportTeamID - (<none>) or (ints, chars or '-')
+                //[1|0],                IsEasy - bool
+                //[1|0],                IsMedium - bool
+                //[1|0]$                IsHard - bool
+
+                //if we match this complex regex, it's a proper Trigger
+                if (Regex.IsMatch(line, @"^[\d\w\-]+=[\d\w\s\._/']+,[\d\w\-]+,<[\w]+>,\d,-?\d,(<none>|[\w_]+),[\d\w]{64},[\d]+.[\d]{6},[\d]+.[\d]{6},[\d]+.[\d]{6},[1|0],[0],[\d],[1|0],(<none>|[\d\w\-]+),[1|0],[1|0],[1|0]$"))
                     TriggersList.Add(GenerateTrigger(line));
+                //only enable for testing purposes
+                ////if not, log it to see if its really a bugged trigger or is a false negative
+                //else
+                //    Console.WriteLine(line);
         }
 
         /// <summary>
