@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CnCAIEditor.Objects
 {
-    public class Team
+    public class AITeam
     {
         public string ID { get; set; }
         public string Name { get; set; }

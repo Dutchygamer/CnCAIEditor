@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace CnCAIEditor
 {
-    public static class Controller
+    public static class AIController
     {
-        public static List<Taskforce> TaskforceList = new List<Taskforce>();
-        public static List<Team> TeamList = new List<Team>();
-        public static List<ScriptType> ScriptTypeList = new List<ScriptType>();
-        public static List<Trigger> TriggersList = new List<Trigger>();
+        public static List<AITaskforce> TaskforceList = new List<AITaskforce>();
+        public static List<AITeam> TeamList = new List<AITeam>();
+        public static List<AIScriptType> ScriptTypeList = new List<AIScriptType>();
+        public static List<AITrigger> TriggersList = new List<AITrigger>();
 
         //TODO: eerste versie gaat ervanuit dat de AI.ini in de juiste volgorde staat
         //juiste volgorde => lijst van TaskForces staat onder [TaskForces] (als voorbeeld)
@@ -43,10 +43,6 @@ namespace CnCAIEditor
 
         public static void ReadFileAsString(string fileData)
         {
-            var moo1 = StringToDecimal("1.0");
-            var moo2 = StringToDecimal("1");
-            var moo3 = StringToDecimal("napalm");
-
             //clear all lists when reading new file
             TaskforceList.Clear();
             TeamList.Clear();
@@ -145,7 +141,7 @@ namespace CnCAIEditor
         /// <summary>
         /// Converts string data into Taskforce object
         /// </summary>
-        private static Taskforce GenerateTaskforce(string data)
+        private static AITaskforce GenerateTaskforce(string data)
         {
             string[] lines = data.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             var dictionary = new Dictionary<string, string>();
@@ -181,8 +177,8 @@ namespace CnCAIEditor
             }
 
             //loop trough all fields of Taskforce and find matching value in dictionary
-            var result = new Taskforce();
-            foreach (var field in typeof(Taskforce).GetProperties())
+            var result = new AITaskforce();
+            foreach (var field in typeof(AITaskforce).GetProperties())
             {
                 //if its the Members field, give it the unitlist
                 if (field.Name == "Members")
@@ -202,7 +198,7 @@ namespace CnCAIEditor
         /// <summary>
         /// Converts string data into ScriptType object
         /// </summary>
-        private static ScriptType GenerateScriptTypes(string data)
+        private static AIScriptType GenerateScriptTypes(string data)
         {
             string[] lines = data.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             var dictionary = new Dictionary<string, string>();
@@ -238,8 +234,8 @@ namespace CnCAIEditor
             }
 
             //loop trough all fields of Taskforce and find matching value in dictionary
-            var result = new ScriptType();
-            foreach (var field in typeof(ScriptType).GetProperties())
+            var result = new AIScriptType();
+            foreach (var field in typeof(AIScriptType).GetProperties())
             {
                 //if its the Members field, give it the unitlist
                 if (field.Name == "Actions")
@@ -259,7 +255,7 @@ namespace CnCAIEditor
         /// <summary>
         /// Converts string data into Team object
         /// </summary>
-        private static Team GenerateTeam(string data)
+        private static AITeam GenerateTeam(string data)
         {
             string[] lines = data.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             var dictionary = new Dictionary<string, string>();
@@ -285,9 +281,9 @@ namespace CnCAIEditor
                 }
             }
 
-            var result = new Team();
+            var result = new AITeam();
             //loop trough all fields of Team and find matching value in dictionary
-            foreach (var field in typeof(Team).GetProperties())
+            foreach (var field in typeof(AITeam).GetProperties())
             {
                 string value;
                 if(dictionary.TryGetValue(field.Name, out value))
@@ -300,7 +296,7 @@ namespace CnCAIEditor
         /// <summary>
         /// Converts string data into Trigger object
         /// </summary>
-        private static Trigger GenerateTrigger(string data)
+        private static AITrigger GenerateTrigger(string data)
         {
             //TODO: afvangen indien Trigger niet compleet is en er stukken missen, waardoor de conversie op zn bek gaat
             //wellicht losse functie die hiervoor checkt
@@ -312,7 +308,7 @@ namespace CnCAIEditor
             lines.Add(triggerID[0]);
             lines.AddRange(triggerComponents);
             
-            var result = new Trigger
+            var result = new AITrigger
             {
                 ID = lines[0],                                      //0981GEB0-G=
                 Name = lines[1],                                    //HM_GDI emporca assisted vehicle attack,

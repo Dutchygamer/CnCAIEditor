@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CnCAIEditor.Objects
 {
-    public class ScriptType
+    public class AIScriptType
     {
         public string ID { get; set; }
         public string Name { get; set; }

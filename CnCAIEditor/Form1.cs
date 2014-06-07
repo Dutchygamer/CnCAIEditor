@@ -18,12 +18,12 @@ namespace CnCAIEditor
             InitializeComponent();
         }
 
-        private void LoadButtonClick(object sender, EventArgs e)
+        private void LoadAIClick(object sender, EventArgs e)
         {
-            LoadFile();
+            LoadAIFile();
         }
 
-        private void LoadFile()
+        private void LoadAIFile()
         {
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Title = "Select AI.ini";
@@ -32,7 +32,7 @@ namespace CnCAIEditor
             {
                 try
                 {
-                    Controller.ReadFileAsString(File.ReadAllText(dialog.FileName));
+                    AIController.ReadFileAsString(File.ReadAllText(dialog.FileName));
                 }
                 catch (Exception e)
                 {
@@ -40,5 +40,32 @@ namespace CnCAIEditor
                 }
             }
         }
+
+        //TODO: doet nog niks nu. Fix editen van plain AI.ini maar eerst voor je hiermee verder gaat kloten
+        private void LoadRulesClick(object sender, EventArgs e)
+        {
+            Console.WriteLine("Whoops!");
+            //TODO: enable when when we can edit AI.ini without references
+            //LoadRulesFile();
+        }
+
+        private void LoadRulesFile()
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Title = "Select rules.ini";
+            dialog.Filter = ".ini|*.ini";
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    RulesController.ReadFileAsString(File.ReadAllText(dialog.FileName));
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("ERROOOOOR!" + e.Message);
+                }
+            }
+        }
+
     }
 }

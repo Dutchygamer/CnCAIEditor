@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CnCAIEditor.Objects
 {
-    public class Taskforce
+    public class AITaskforce
     {
         public string ID { get; set; }
 

@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace CnCAIEditor.Objects
 {
-    public class Trigger
+    public class AITrigger
     {
         //defaults
-        public Trigger()
+        public AITrigger()
         {
             AvailableInSkirmish = true;
             DummyValue = 0;
@@ -24,7 +24,7 @@ namespace CnCAIEditor.Objects
         //TODO: not sure if needed
         public string TeamID { get; set; }
 
-        public Team Team { get; set; }
+        public AITeam Team { get; set; }
 
         public string Owner { get; set; }
 
@@ -59,7 +59,7 @@ namespace CnCAIEditor.Objects
         //TODO: not sure if needed
         public string SupportTeamID { get; set; }
 
-        public Team SupportTeam { get; set; }
+        public AITeam SupportTeam { get; set; }
         
         //TODO: either 0 or 1, else possibly change to int
         public bool IsEasy { get; set; }
